@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="D:/Projects Folder/DinOptica/DinOptica/Store.API/Store.API.csproj" />
+  <Project Path="D:/Projects Folder/DinOptica/DinOptica/Store.Application/Store.Application.csproj" />
+  <Project Path="D:/Projects Folder/DinOptica/DinOptica/Store.Domain/Store.Domain.csproj" />
+  <Project Path="D:/Projects Folder/DinOptica/DinOptica/Store.Infrastructure/Store.Infrastructure.csproj" />
+</Solution>
