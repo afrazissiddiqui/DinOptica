@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Store.Application.DTOs.Cart;
 using Store.Application.Interfaces;
@@ -8,69 +7,146 @@ namespace Store.API.Controllers;
 
 [ApiController]
 [Route("api/cart")]
-[Authorize]
 public class CartController : ControllerBase
 {
     private readonly ICartService _cartService;
+    private readonly IGuestCartService _guestCartService;
 
-    public CartController(ICartService cartService)
+    private const string GuestCartCookie = "GuestCartId";
+
+    public CartController(
+        ICartService cartService,
+        IGuestCartService guestCartService)
     {
         _cartService = cartService;
+        _guestCartService = guestCartService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetCart()
     {
-        var userId = GetUserId();
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userId = GetUserId();
 
-        var cart = await _cartService.GetOrCreateCartAsync(userId);
+            var cart = await _cartService.GetOrCreateCartAsync(userId);
 
-        return Ok(cart);
+            return Ok(cart);
+        }
+
+        var guestCartId = GetOrCreateGuestCartId();
+
+        var guestCart =
+            await _cartService.GetOrCreateGuestCartAsync(guestCartId);
+
+        return Ok(guestCart);
     }
 
     [HttpPost("items")]
     public async Task<IActionResult> AddItem(
         AddToCartRequest request)
     {
-        var userId = GetUserId();
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userId = GetUserId();
 
-        var cart = await _cartService.AddItemAsync(
-            userId,
+            var cart = await _cartService.AddItemAsync(
+                userId,
+                request);
+
+            return Ok(cart);
+        }
+
+        var guestCartId = GetOrCreateGuestCartId();
+
+        var guestCart = await _cartService.AddGuestItemAsync(
+            guestCartId,
             request);
 
-        return Ok(cart);
+        return Ok(guestCart);
     }
 
     [HttpPut("items/{productId:int}")]
     public async Task<IActionResult> UpdateItem(
-    int productId,
-    UpdateCartItemRequest request)
+        int productId,
+        UpdateCartItemRequest request)
     {
-        var userId = GetUserId();
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userId = GetUserId();
 
-        var cart = await _cartService.UpdateItemAsync(
-            userId,
+            var cart = await _cartService.UpdateItemAsync(
+                userId,
+                productId,
+                request);
+
+            return Ok(cart);
+        }
+
+        var guestCartId = GetOrCreateGuestCartId();
+
+        var guestCart = await _cartService.UpdateGuestItemAsync(
+            guestCartId,
             productId,
             request);
 
-        return Ok(cart);
+        return Ok(guestCart);
     }
 
     [HttpDelete("items/{productId:int}")]
     public async Task<IActionResult> RemoveItem(int productId)
     {
-        var userId = GetUserId();
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userId = GetUserId();
 
-        var cart = await _cartService.RemoveItemAsync(
-            userId,
+            var cart = await _cartService.RemoveItemAsync(
+                userId,
+                productId);
+
+            return Ok(cart);
+        }
+
+        var guestCartId = GetOrCreateGuestCartId();
+
+        var guestCart = await _cartService.RemoveGuestItemAsync(
+            guestCartId,
             productId);
 
-        return Ok(cart);
+        return Ok(guestCart);
+    }
+
+    private string GetOrCreateGuestCartId()
+    {
+        if (Request.Cookies.TryGetValue(
+            GuestCartCookie,
+            out var existingGuestCartId)
+            && !string.IsNullOrWhiteSpace(existingGuestCartId))
+        {
+            return existingGuestCartId;
+        }
+
+        var guestCartId =
+            _guestCartService.GenerateGuestCartId();
+
+        Response.Cookies.Append(
+            GuestCartCookie,
+            guestCartId,
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddDays(30)
+            });
+
+        return guestCartId;
     }
 
     private int GetUserId()
     {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdClaim =
+            User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (!int.TryParse(userIdClaim, out var userId))
         {

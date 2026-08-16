@@ -10,10 +10,16 @@ namespace Store.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly ICartService _cartService;
 
-    public AuthController(IAuthService authService)
+    private const string GuestCartCookie = "GuestCartId";
+
+    public AuthController(
+        IAuthService authService,
+        ICartService cartService)
     {
         _authService = authService;
+        _cartService = cartService;
     }
 
     [HttpPost("register")]
@@ -28,6 +34,18 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginRequest request)
     {
         var response = await _authService.LoginAsync(request);
+
+        if (Request.Cookies.TryGetValue(
+            GuestCartCookie,
+            out var guestCartId)
+            && !string.IsNullOrWhiteSpace(guestCartId))
+        {
+            await _cartService.MergeGuestCartAsync(
+                guestCartId,
+                response.UserId);
+
+            Response.Cookies.Delete(GuestCartCookie);
+        }
 
         return Ok(response);
     }

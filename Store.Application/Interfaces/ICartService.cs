@@ -9,12 +9,31 @@ public interface ICartService
     Task<CartResponse> AddItemAsync(
         int userId,
         AddToCartRequest request);
+
     Task<CartResponse> UpdateItemAsync(
-    int userId,
-    int productId,
-    UpdateCartItemRequest request);
+        int userId,
+        int productId,
+        UpdateCartItemRequest request);
+
     Task<CartResponse> RemoveItemAsync(
-    int userId,
-    int productId);
-    
+        int userId,
+        int productId);
+
+    Task<CartResponse> GetOrCreateGuestCartAsync(
+        string guestCartId);
+
+    Task<CartResponse> AddGuestItemAsync(
+        string guestCartId,
+        AddToCartRequest request);
+    Task MergeGuestCartAsync(
+    string guestCartId,
+    int userId);
+    Task<CartResponse> UpdateGuestItemAsync(
+        string guestCartId,
+        int productId,
+        UpdateCartItemRequest request);
+
+    Task<CartResponse> RemoveGuestItemAsync(
+        string guestCartId,
+        int productId);
 }

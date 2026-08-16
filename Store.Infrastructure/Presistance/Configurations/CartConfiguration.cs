@@ -10,18 +10,16 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
     {
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.CreatedAt)
-            .IsRequired();
-
-        builder.Property(x => x.UpdatedAt)
-            .IsRequired();
-
         builder.HasOne(x => x.User)
-            .WithOne()
-            .HasForeignKey<Cart>(x => x.UserId)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(x => x.UserId)
-            .IsUnique();
+        builder.Property(x => x.GuestCartId)
+            .HasMaxLength(100);
+
+        builder.HasIndex(x => x.GuestCartId)
+            .IsUnique()
+            .HasFilter("[GuestCartId] IS NOT NULL");
     }
 }
