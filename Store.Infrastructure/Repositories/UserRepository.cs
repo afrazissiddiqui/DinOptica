@@ -30,7 +30,12 @@ public class UserRepository : IUserRepository
     {
         await _context.Users.AddAsync(user);
     }
-
+    public async Task<List<User>> GetAllAsync()
+    {
+        return await _context.Users
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+    }
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

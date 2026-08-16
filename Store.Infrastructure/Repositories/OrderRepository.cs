@@ -13,7 +13,21 @@ public class OrderRepository : IOrderRepository
     {
         _context = context;
     }
-
+    public async Task<Order?> GetByIdForAdminAsync(int orderId)
+    {
+        return await _context.Orders
+            .Include(x => x.Items)
+            .Include(x => x.User)
+            .FirstOrDefaultAsync(x => x.Id == orderId);
+    }
+    public async Task<List<Order>> GetAllAsync()
+    {
+        return await _context.Orders
+            .Include(x => x.Items)
+            .Include(x => x.User)
+            .OrderByDescending(x => x.CreatedAt)
+            .ToListAsync();
+    }
     public async Task AddAsync(Order order)
     {
         await _context.Orders.AddAsync(order);

@@ -15,8 +15,8 @@ public interface IOrderRepository
 
     Task SaveChangesAsync();
     Task<IDisposable> BeginTransactionAsync();
-
+    Task<Order?> GetByIdForAdminAsync(int orderId);
     Task CommitTransactionAsync();
-
+    Task<List<Order>> GetAllAsync();
     Task RollbackTransactionAsync();
 }
