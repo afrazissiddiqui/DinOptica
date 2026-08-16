@@ -13,7 +13,7 @@ public interface ICartRepository
     Task<CartItem?> GetItemAsync(
     int cartId,
     int productId);
-
+    Task ClearAsync(int cartId);
     Task RemoveItemAsync(CartItem item);
 
     Task SaveChangesAsync();

@@ -44,12 +44,18 @@ public class CartRepository : ICartRepository
                 x.CartId == cartId &&
                 x.ProductId == productId);
     }
+    public async Task ClearAsync(int cartId)
+    {
+        var items = await _context.CartItems
+            .Where(x => x.CartId == cartId)
+            .ToListAsync();
 
+        _context.CartItems.RemoveRange(items);
+    }
     public async Task RemoveItemAsync(CartItem item)
     {
         _context.CartItems.Remove(item);
     }
-
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();

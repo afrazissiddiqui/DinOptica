@@ -11,6 +11,11 @@ public interface IProductRepository
     Task<Product?> GetByNameAsync(string name);
 
     Task AddAsync(Product product);
-
+    Task<bool> ReduceStockAsync(
+    int productId,
+    int quantity);
+    Task<bool> RestoreStockAsync(
+    int productId,
+    int quantity);
     Task SaveChangesAsync();
 }

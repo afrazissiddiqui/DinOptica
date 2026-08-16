@@ -40,7 +40,43 @@ public class ProductRepository : IProductRepository
     {
         await _context.Products.AddAsync(product);
     }
+    public async Task<bool> ReduceStockAsync(
+    int productId,
+    int quantity)
+    {
+        var product = await _context.Products
+            .FirstOrDefaultAsync(x => x.Id == productId);
 
+        if (product is null)
+        {
+            return false;
+        }
+
+        if (product.StockQuantity < quantity)
+        {
+            return false;
+        }
+
+        product.StockQuantity -= quantity;
+
+        return true;
+    }
+    public async Task<bool> RestoreStockAsync(
+    int productId,
+    int quantity)
+    {
+        var product = await _context.Products
+            .FirstOrDefaultAsync(x => x.Id == productId);
+
+        if (product is null)
+        {
+            return false;
+        }
+
+        product.StockQuantity += quantity;
+
+        return true;
+    }
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
