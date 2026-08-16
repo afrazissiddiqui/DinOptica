@@ -83,6 +83,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+// Seed the database with initial data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider
+        .GetRequiredService<StoreDbContext>();
+
+    var passwordHasher = scope.ServiceProvider
+        .GetRequiredService<IPasswordHasher>();
+
+    await DbSeeder.SeedAsync(context, passwordHasher);
+}
+
 //Middleware for handling exceptions globally
 app.UseMiddleware<ExceptionMiddleware>();
 

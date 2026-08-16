@@ -42,4 +42,17 @@ public class AuthController : ControllerBase
             userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
         });
     }
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin-test")]
+    public IActionResult AdminTest()
+    {
+        return Ok(new
+        {
+            message = "You are an Admin.",
+            userId = User.FindFirst(
+                System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+            role = User.FindFirst(
+                System.Security.Claims.ClaimTypes.Role)?.Value
+        });
+    }
 }

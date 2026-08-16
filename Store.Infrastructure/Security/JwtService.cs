@@ -29,12 +29,12 @@ public class JwtService : IJwtService
             _configuration["Jwt:ExpiresInMinutes"] ?? "60");
 
         var claims = new List<Claim>
-        {
-            //new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(JwtRegisteredClaimNames.Email, user.Email),
-            new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}")
-        };
+{
+    new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+    new(JwtRegisteredClaimNames.Email, user.Email),
+    new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
+    new(ClaimTypes.Role, user.Role.ToString())
+};
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(jwtKey));
